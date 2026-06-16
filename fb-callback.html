@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook OAuth Callback</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: white; border-radius: 12px; padding: 40px; max-width: 600px; width: 90%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #1877f2; margin-bottom: 20px; font-size: 24px; }
+        .token-box { background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 15px; word-break: break-all; font-family: monospace; font-size: 12px; margin: 15px 0; max-height: 150px; overflow-y: auto; }
+        .btn { background: #1877f2; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 5px; }
+        .btn:hover { background: #166fe5; }
+        .btn-success { background: #42b72a; }
+        .btn-success:hover { background: #36a420; }
+        .info { color: #666; margin: 10px 0; }
+        .success { color: #42b72a; font-weight: bold; }
+        .error { color: #e41e3f; font-weight: bold; }
+        #result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Facebook OAuth Callback</h1>
+        <p class="info">Đang xử lý token...</p>
+
+        <div id="result">
+            <div class="token-box" id="tokenDisplay">Đang tải...</div>
+            <p class="info">Token length: <span id="tokenLength">0</span> chars</p>
+            <button class="btn" onclick="copyToken()">📋 Copy Token</button>
+            <button class="btn btn-success" onclick="window.close()">✅ Đóng</button>
+        </div>
+
+        <div id="error" style="display:none;">
+            <p class="error">❌ Không tìm thấy token trong URL</p>
+            <p class="info">Hãy đảm bảo bạn đã authorize app thành công.</p>
+        </div>
+    </div>
+
+    <script>
+        // Extract token from URL fragment (#access_token=...)
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+
+        if (accessToken) {
+            document.getElementById('tokenDisplay').textContent = accessToken;
+            document.getElementById('tokenLength').textContent = accessToken.length;
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+
+            // Auto-copy to clipboard
+            navigator.clipboard.writeText(accessToken).then(() => {
+                document.querySelector('.info').innerHTML = '<span class="success">✅ Token đã được copy vào clipboard!</span>';
+            }).catch(() => {
+                document.querySelector('.info').innerHTML = '<span class="info">Token đã được hiển thị bên dưới. Hãy copy thủ công.</span>';
+            });
+        } else {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function copyToken() {
+            navigator.clipboard.writeText(accessToken).then(() => {
+                alert('✅ Token đã copy!');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = accessToken;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✅ Token đã copy!');
+            });
+        }
+    </script>
+</body>
+</html>
