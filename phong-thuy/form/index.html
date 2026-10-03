@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Xem lá số — Tư vấn thời gian</title>
+  <link rel="stylesheet" href="../app.css">
+  <style>
+    .form { max-width: 36rem; margin: 0 auto; padding: 2rem var(--pad) 4rem; }
+    .progress { display: flex; gap: .5rem; margin-bottom: 2rem; }
+    .progress span { flex: 1; height: 4px; background: var(--line); border-radius: 2px; }
+    .progress span.done { background: var(--accent); }
+    .step { display: none; }
+    .step.active { display: block; }
+    .field { margin-bottom: 1.25rem; }
+    label { display: block; font-weight: 500; margin-bottom: .375rem; font-size: .9375rem; }
+    .req { color: var(--danger); margin-left: 2px; }
+    .hint { display: block; color: var(--muted); font-size: .8125rem; margin-top: .25rem; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="time"], select, textarea {
+      width: 100%;
+      padding: .625rem .75rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      font: inherit;
+      color: var(--fg);
+      background: var(--surface);
+      min-height: 2.75rem;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+    .error { color: var(--danger); font-size: .875rem; margin-top: .25rem; display: none; }
+    .error.show { display: block; }
+    .step-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2rem; }
+    .confirm-grid {
+      display: grid;
+      gap: .75rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .confirm-grid div { display: flex; justify-content: space-between; gap: 1rem; }
+    .confirm-grid dt { color: var(--muted); }
+    .confirm-grid dd { margin: 0; text-align: right; }
+    .qr-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+    }
+    .qr-box img { max-width: 240px; width: 100%; aspect-ratio: 1; }
+    .qr-info { margin-top: 1rem; font-size: .9375rem; color: var(--muted); }
+    .disclaimer {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: .875rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Bỏ qua</a>
+
+  <header class="nav">
+    <a href="../" class="brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" fill="currentColor"/>
+        <circle cx="16" cy="16" r="9" fill="none" stroke="white" stroke-width="1.5"/>
+        <circle cx="16" cy="16" r="4" fill="white"/>
+      </svg>
+      <strong>Tư vấn thời gian</strong>
+    </a>
+    <nav><a href="../">Trang chủ</a></nav>
+  </header>
+
+  <main id="main" class="form">
+    <div class="progress" aria-label="Tiến độ">
+      <span data-step="1"></span>
+      <span data-step="2"></span>
+      <span data-step="3"></span>
+      <span data-step="4"></span>
+    </div>
+
+    <form id="form" novalidate>
+      <section class="step active" data-step="1">
+        <h1>Nhập thông tin</h1>
+        <p class="lede">Bước 1/4 — Càng chính xác càng tốt. Giờ không rõ có thể chọn gần đúng.</p>
+
+        <div class="disclaimer">
+          <b>Disclaimer.</b> Đây là phân tích tham khảo văn hoá phương Đông, không phải dự đoán tương lai. Không thay thế quyết định cá nhân, y tế, pháp lý, hay tài chính.
+        </div>
+
+        <div class="field">
+          <label for="subject_name">Họ tên người xem <span class="req">*</span></label>
+          <input id="subject_name" name="subject_name" type="text" required>
+        </div>
+
+        <div class="field">
+          <label for="subject_email">Email nhận lá số <span class="req">*</span></label>
+          <input id="subject_email" name="subject_email" type="email" required>
+          <span class="hint">Lá số HTML sẽ gửi qua email trong vòng 5 phút sau khi xác nhận thanh toán.</span>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="birth_date">Ngày sinh Dương lịch <span class="req">*</span></label>
+            <input id="birth_date" name="birth_date" type="date" required>
+            <span class="error" data-for="birth_date"></span>
+          </div>
+          <div class="field">
+            <label for="birth_time">Giờ sinh</label>
+            <input id="birth_time" name="birth_time" type="time">
+            <span class="hint">Không rõ thì bỏ trống, hệ thống sẽ ghi rõ giả định.</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="gender">Giới tính <span class="req">*</span></label>
+            <select id="gender" name="gender" required>
+              <option value="">— chọn —</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+              <option value="other">Khác</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="purpose">Mục đích xem <span class="req">*</span></label>
+            <select id="purpose" name="purpose" required>
+              <option value="">— chọn —</option>
+              <option value="career">Sự nghiệp</option>
+              <option value="marriage">Hôn nhân</option>
+              <option value="health">Sức khỏe</option>
+              <option value="wealth">Tài lộc</option>
+              <option value="time">Chọn thời điểm</option>
+              <option value="general">Tổng quát</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notes">Câu hỏi cụ thể (tùy chọn)</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Ví dụ: nên khởi sự kinh doanh tháng nào, có nên chuyển công tác..."></textarea>
+        </div>
+
+        <div class="step-nav">
+          <span></span>
+          <button class="btn primary lg" type="button" data-action="next">Tiếp tục</button>
+        </div>
+      </section>
+
+      <section class="step" data-step="2">
+        <h1>Xác nhận thông tin</h1>
+        <p class="lede">Bước 2/4 — Kiểm tra lại. Ngày giờ sinh sai sẽ ra lá số khác.</p>
+
+        <dl class="confirm-grid" id="confirm"></dl>
+
+        <div class="step-nav">
+          <button class="btn ghost" type="button" data-action="prev">Quay lại</button>
+          <button class="btn primary lg" type="button" data-action="next">Gửi yêu cầu</button>
+        </div>
+      </section>
+
+      <section class="step" data-step="3">
+        <h1>Chuyển khoản 200.000đ</h1>
+        <p class="lede">Bước 3/4 — Quét QR hoặc chuyển khoản thủ công. Lá số sẽ được gửi sau khi nhận thanh toán.</p>
+
+        <div class="qr-box">
+          <img id="qr" alt="Mã QR chuyển khoản" width="240" height="240">
+          <p><b id="refCode">—</b></p>
+          <p class="qr-info">
+            Ngân hàng: <span id="bank">—</span><br>
+            Số tài khoản: <span id="account">—</span><br>
+            Chủ tài khoản: <span id="accountName">—</span><br>
+            Số tiền: <b>200.000đ</b><br>
+            Nội dung: <b id="memo">—</b>
+          </p>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn ghost" type="button" data-action="prev">Quay lại</button>
+          <button class="btn primary lg" type="button" data-action="next">Tôi đã chuyển khoản</button>
+        </div>
+      </section>
+
+      <section class="step" data-step="4">
+        <h1>Đã nhận yêu cầu</h1>
+        <p class="lede">Bước 4/4 — Lá số sẽ được gửi qua email trong 5 phút. Bạn có thể đóng trang này.</p>
+
+        <p>Mã theo dõi: <b id="caseId">—</b></p>
+        <p>Bạn sẽ nhận được email từ <b>apps@mtholding.vn</b> khi lá số sẵn sàng.</p>
+        <p>Có thắc mắc? Gửi email <a href="mailto:apps@mtholding.vn">apps@mtholding.vn</a>.</p>
+      </section>
+    </form>
+  </main>
+
+  <script>
+    const S = { step: 1, data: {}, caseId: null };
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+
+    function showStep(n) {
+      S.step = n;
+      $$('.step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === n));
+      $$('.progress span').forEach(el => el.classList.toggle('done', Number(el.dataset.step) <= n));
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function setError(name, msg) {
+      const el = $(`.error[data-for="${name}"]`);
+      if (el) { el.textContent = msg; el.classList.toggle('show', Boolean(msg)); }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function validateStep1() {
+      let ok = true;
+      ['subject_name', 'subject_email', 'birth_date', 'gender', 'purpose'].forEach(name => {
+        const v = $(`#${name}`).value.trim();
+        if (!v) {
+          if (name === 'birth_date') setError('birth_date', 'Vui lòng nhập ngày sinh.');
+          ok = false;
+        } else setError('birth_date', '');
+      });
+      const email = $('#subject_email').value.trim();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ok = false;
+      return ok;
+    }
+
+    function collectData() {
+      S.data = {
+        subject_name: $('#subject_name').value.trim(),
+        subject_email: $('#subject_email').value.trim(),
+        birth_date: $('#birth_date').value,
+        birth_time: $('#birth_time').value,
+        gender: $('#gender').value,
+        purpose: $('#purpose').value,
+        notes: $('#notes').value.trim(),
+      };
+    }
+
+    function renderConfirm() {
+      const labels = {
+        subject_name: 'Họ tên', subject_email: 'Email', birth_date: 'Ngày sinh',
+        birth_time: 'Giờ sinh', gender: 'Giới tính', purpose: 'Mục đích', notes: 'Câu hỏi',
+      };
+      const genderLabel = { male: 'Nam', female: 'Nữ', other: 'Khác' };
+      const purposeLabel = { career: 'Sự nghiệp', marriage: 'Hôn nhân', health: 'Sức khỏe', wealth: 'Tài lộc', time: 'Chọn thời điểm', general: 'Tổng quát' };
+      const dl = $('#confirm');
+      dl.innerHTML = '';
+      Object.entries(S.data).forEach(([k, v]) => {
+        let display = v || '—';
+        if (k === 'gender') display = genderLabel[v] || '—';
+        if (k === 'purpose') display = purposeLabel[v] || '—';
+        const wrap = document.createElement('div');
+        wrap.innerHTML = `<dt>${labels[k]}</dt><dd>${escapeHtml(display)}</dd>`;
+        dl.appendChild(wrap);
+      });
+    }
+
+    async function submitCase() {
+      try {
+        const res = await fetch('/api/laso', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(S.data),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: 'Lỗi không xác định.' }));
+          alert('Gửi thất bại: ' + (err.detail || res.status));
+          return false;
+        }
+        const json = await res.json();
+        S.caseId = json.case_id;
+        $('#caseId').textContent = json.case_id;
+        $('#refCode').textContent = json.ref_code;
+        $('#bank').textContent = json.bank;
+        $('#account').textContent = json.account;
+        $('#accountName').textContent = json.account_name;
+        $('#memo').textContent = json.memo;
+        $('#qr').src = json.qr_url;
+        return true;
+      } catch (e) {
+        alert('Lỗi kết nối: ' + e.message);
+        return false;
+      }
+    }
+
+    document.addEventListener('click', async e => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+      if (action === 'next') {
+        if (S.step === 1) {
+          if (!validateStep1()) return;
+          collectData();
+          renderConfirm();
+          showStep(2);
+        } else if (S.step === 2) {
+          const ok = await submitCase();
+          if (ok) showStep(3);
+        } else if (S.step === 3) {
+          showStep(4);
+        }
+      } else if (action === 'prev') {
+        if (S.step > 1) showStep(S.step - 1);
+      }
+    });
+  </script>
+</body>
+</html>
