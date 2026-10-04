@@ -322,10 +322,34 @@
 
     async function submitCase() {
       try {
-        const fd = new FormData();
-        Object.entries(S.data).forEach(([k, v]) => fd.append(k, v));
-        S.files.forEach(f => fd.append('files', f));
-        const res = await fetch('/api/intake', { method: 'POST', body: fd });
+        // Smart routing: auto-detect subject_type from name pattern + taxcode
+        const _name = S.data.subject_name || '';
+        const _tax = (S.data.subject_taxcode || '').replace(/\D/g, '');
+        const _words = _name.trim().split(/\s+/);
+        const _vietnamese = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(_name);
+        let _detected = S.data.subject_type;
+        // Tax code 10-13 digits = company/shop; 9-12 digits = individual CCCD
+        if (_tax.length >= 10) {
+          _detected = 'company';
+        } else if (_tax.length >= 9 && _tax.length < 10) {
+          _detected = 'individual';
+        } else if (_words.length >= 3 && _vietnamese) {
+          _detected = 'individual';
+        }
+        if (_detected !== S.data.subject_type) {
+          console.log('[smart-route]', _name, 'tax=', _tax, '-> override', S.data.subject_type, 'to', _detected);
+          S.data.subject_type = _detected;
+        }
+        
+        const payload = { ...S.data };
+        if (S.files.length) {
+          payload.files = S.files.map(f => ({ name: f.name, size: f.size, type: f.type }));
+        }
+        const res = await fetch('https://crawbot-master-9.taild7e69a.ts.net:8953/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
         if (!res.ok) {
           const err = await res.json().catch(() => ({ detail: 'Lỗi không xác định.' }));
           alert('Gửi thất bại: ' + (err.detail || res.status));
